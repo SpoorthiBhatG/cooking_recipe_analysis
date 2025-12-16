@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍳 Recipe Explorer - 100k+ Recipes</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p>Loading recipes...</p>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-utensils"></i>
+                    <h1>Recipe Explorer</h1>
+                    <span class="beta-badge">100k+ Recipes</span>
+                </div>
+                
+                <nav class="nav">
+                    <button class="nav-btn active" data-view="explore">
+                        <i class="fas fa-search"></i> Explore
+                    </button>
+                    <button class="nav-btn" data-view="analyze">
+                        <i class="fas fa-calculator"></i> Analyze
+                    </button>
+                    <button class="nav-btn" data-view="stats">
+                        <i class="fas fa-chart-bar"></i> Statistics
+                    </button>
+                    <button class="nav-btn" data-view="favorites">
+                        <i class="fas fa-heart"></i> Favorites
+                    </button>
+                </nav>
+                
+                <button id="themeToggle" class="theme-toggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <div class="container">
+            
+            <!-- ===== EXPLORE VIEW ===== -->
+            <section id="exploreView" class="view active">
+                
+                <!-- Search & Filters -->
+                <div class="search-section">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Search by recipe name or ingredient...">
+                        <button id="searchBtn" class="btn btn-primary">Search</button>
+                    </div>
+                    
+                    <div class="filters">
+                        <button id="filterToggle" class="btn btn-secondary">
+                            <i class="fas fa-filter"></i> Filters
+                        </button>
+                        <button id="randomBtn" class="btn btn-secondary">
+                            <i class="fas fa-random"></i> Random Recipe
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Filter Panel (Hidden by default) -->
+                <div id="filterPanel" class="filter-panel" style="display: none;">
+                    <div class="filter-group">
+                        <label>Difficulty</label>
+                        <select id="filterDifficulty">
+                            <option value="">All</option>
+                            <option value="Easy">Easy</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Hard">Hard</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Cuisine</label>
+                        <select id="filterCuisine">
+                            <option value="">All Cuisines</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Max Time (mins)</label>
+                        <input type="number" id="filterMaxTime" placeholder="e.g., 30">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Max Calories</label>
+                        <input type="number" id="filterMaxCalories" placeholder="e.g., 500">
+                    </div>
+                    
+                    <div class="filter-actions">
+                        <button id="applyFilters" class="btn btn-primary">Apply Filters</button>
+                        <button id="clearFilters" class="btn btn-secondary">Clear</button>
+                    </div>
+                </div>
+                
+                <!-- Recipe Grid -->
+                <div id="recipeGrid" class="recipe-grid">
+                    <!-- Recipe cards will be injected here by JS -->
+                </div>
+                
+                <!-- Pagination -->
+                <div id="pagination" class="pagination">
+                    <!-- Pagination buttons will be injected here -->
+                </div>
+            </section>
+            
+            <!-- ===== ANALYZE VIEW (RECIPE STUDIO) ===== -->
+            <section id="analyzeView" class="view">
+                <div class="analyze-container">
+                    <div class="studio-header">
+                        <h2>🧪 Recipe Studio</h2>
+                        <p class="subtitle">Draft, analyze, compare, and publish your culinary creations</p>
+                    </div>
+                    
+                    <div class="studio-grid">
+                        <!-- Left Column: Input Form -->
+                        <div class="studio-input">
+                            <form id="analyzeForm" class="analyze-form">
+                                <div class="form-group">
+                                    <label>Recipe Title</label>
+                                    <input type="text" id="recipeTitle" placeholder="e.g. Grandma's Secret Butter Chicken" required>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group half">
+                                        <label>Cuisine</label>
+                                        <input type="text" id="recipeCuisine" placeholder="e.g. North Indian" list="cuisineList">
+                                        <datalist id="cuisineList">
+                                            <!-- Populated by JS -->
+                                        </datalist>
+                                    </div>
+                                    <div class="form-group half checkbox-group">
+                                        <label>
+                                            <input type="checkbox" id="isVegetarian">
+                                            Vegetarian? 🥗
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Ingredients (one per line)</label>
+                                    <textarea id="ingredientsInput" rows="8" placeholder="2 cups rice&#10;500g chicken breast&#10;3 tablespoons olive oil" required></textarea>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Cooking Instructions</label>
+                                    <textarea id="stepsInput" rows="10" placeholder="1. Heat oil in a pan&#10;2. Add chicken and cook until golden&#10;3. Add rice and water" required></textarea>
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary btn-large">
+                                        <i class="fas fa-wand-magic-sparkles"></i> Analyze & Compare
+                                    </button>
+                                    <button type="button" id="saveRecipeBtn" class="btn btn-success btn-large" style="display: none;">
+                                        <i class="fas fa-save"></i> Publish Recipe
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Right Column: Results (Hidden initially) -->
+                        <div id="analysisResults" class="studio-results" style="display: none;">
+                            <!-- Tabs for results -->
+                            <div class="results-tabs">
+                                <button class="tab-btn active" data-tab="overview">Overview</button>
+                                <button class="tab-btn" data-tab="flavor">Flavor Profile</button>
+                                <button class="tab-btn" data-tab="compare">Comparison</button>
+                            </div>
+
+                            <!-- Overview Tab -->
+                            <div id="tab-overview" class="result-content active">
+                                <div class="score-card">
+                                    <div class="score-circle">
+                                        <span id="healthScore">85</span>
+                                        <label>Health Score</label>
+                                    </div>
+                                    
+                                    <div class="quick-stats">
+                                        <div class="q-stat">
+                                            <i class="fas fa-fire"></i>
+                                            <span id="resCalories">0</span> kcal
+                                        </div>
+                                        <div class="q-stat">
+                                            <i class="fas fa-clock"></i>
+                                            <span id="resTime">0</span> min
+                                        </div>
+                                        <div class="q-stat">
+                                            <i class="fas fa-layer-group"></i>
+                                            <span id="resDifficulty">Medium</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="allergen-box" id="allergenBox" style="display: none;">
+                                    <h4>⚠️ Allergens Detected</h4>
+                                    <ul id="allergenList"></ul>
+                                </div>
+
+                                <div class="suggestions-box">
+                                    <h4>💡 Chef's Suggestions</h4>
+                                    <div id="chefSuggestions"></div>
+                                </div>
+                            </div>
+
+                            <!-- Flavor Profile Tab -->
+                            <div id="tab-flavor" class="result-content">
+                                <div class="chart-container">
+                                    <canvas id="flavorRadarChart"></canvas>
+                                </div>
+                                <p class="chart-caption">Flavor balance based on ingredients</p>
+                            </div>
+
+                            <!-- Comparison Tab -->
+                            <div id="tab-compare" class="result-content">
+                                <h4>vs. Database Average</h4>
+                                <div class="comparison-bars" id="comparisonBars">
+                                    <!-- Injected by JS -->
+                                </div>
+
+                                <h4 class="mt-4">Similar Recipes</h4>
+                                <div class="similar-recipes-list" id="similarRecipes">
+                                    <!-- Injected by JS -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- ===== STATISTICS VIEW ===== -->
+            <section id="statsView" class="view">
+                <div class="stats-container">
+                    <h2>📊 Database Statistics</h2>
+                    
+                    <div class="stats-summary" id="statsSummary">
+                        <!-- Summary cards will be injected here -->
+                    </div>
+                    
+                    <div class="charts-grid">
+                        <div class="chart-card">
+                            <h3>Recipes by Difficulty</h3>
+                            <canvas id="difficultyChart"></canvas>
+                        </div>
+                        
+                        <div class="chart-card">
+                            <h3>Top 10 Cuisines</h3>
+                            <canvas id="cuisineChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- ===== FAVORITES VIEW ===== -->
+            <section id="favoritesView" class="view">
+                <div class="favorites-container">
+                    <h2>❤️ Your Favorite Recipes</h2>
+                    <p class="subtitle">Saved recipes are stored locally in your browser</p>
+                    
+                    <div id="favoritesGrid" class="recipe-grid">
+                        <!-- Favorite recipes will be injected here -->
+                    </div>
+                    
+                    <div id="noFavorites" class="empty-state" style="display: none;">
+                        <i class="fas fa-heart-broken"></i>
+                        <p>No favorites yet. Start exploring and save your favorite recipes!</p>
+                    </div>
+                </div>
+            </section>
+            
+        </div>
+    </main>
+
+    <!-- Recipe Detail Modal -->
+    <div id="recipeModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <div id="recipeDetail">
+                <!-- Recipe details will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 Recipe Explorer | Powered by MongoDB | 100,000+ Recipes</p>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="js/app.js"></script>
+</body>
+</html>
